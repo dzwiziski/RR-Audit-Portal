@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ClientInfo, Participant } from '../types';
 import { Users, Building, Calendar, UserPlus, Trash2, ArrowRight } from 'lucide-react';
