@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { AUDIT_DATA } from './constants';
 import { AuditResponse, SectionScore, AuditItem, ClientInfo } from './types';
 import AuditForm from './components/AuditForm';
@@ -8,21 +8,59 @@ import FrameworkGuide from './components/FrameworkGuide';
 import StartPage from './components/StartPage';
 import { BarChart3, LayoutDashboard, ChevronRight, Menu, BookOpen, Plus, Trash2, CheckCircle2, User, Home } from 'lucide-react';
 
+const STORAGE_KEY_ITEMS = 'gtm_audit_items';
+const STORAGE_KEY_RESPONSES = 'gtm_audit_responses';
+const STORAGE_KEY_CLIENT = 'gtm_audit_client';
+
 const App: React.FC = () => {
   // Active view: 'start', 'dashboard', 'framework', or category name
   const [activeView, setActiveView] = useState<string>('start');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Client Info State
-  const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
+  // Client Info State - with LocalStorage persistence
+  const [clientInfo, setClientInfo] = useState<ClientInfo | null>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_CLIENT);
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      console.error("Failed to load client info from storage", e);
+      return null;
+    }
+  });
 
-  // State for dynamic items and responses
+  // State for dynamic items and responses - with LocalStorage persistence
   const [auditItems, setAuditItems] = useState<AuditItem[]>(() => {
-    // In a real app, we might load this from local storage
-    return AUDIT_DATA;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_ITEMS);
+      return saved ? JSON.parse(saved) : AUDIT_DATA;
+    } catch (e) {
+      console.error("Failed to load audit items from storage", e);
+      return AUDIT_DATA;
+    }
   });
   
-  const [responses, setResponses] = useState<Record<string, AuditResponse>>({});
+  const [responses, setResponses] = useState<Record<string, AuditResponse>>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_RESPONSES);
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      console.error("Failed to load responses from storage", e);
+      return {};
+    }
+  });
+
+  // Persist state changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_CLIENT, JSON.stringify(clientInfo));
+  }, [clientInfo]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(auditItems));
+  }, [auditItems]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_RESPONSES, JSON.stringify(responses));
+  }, [responses]);
 
   // Derive categories from current items
   const categories = useMemo(() => {
@@ -391,3 +429,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+    
