@@ -31,7 +31,8 @@ const Dashboard: React.FC<DashboardProps> = ({ scores, responses, items }) => {
   const handleGenerateInsight = async () => {
     setIsLoading(true);
     try {
-      const genAI = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // Fix: Use 'ai' as variable name per guidelines
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
       const summaryData = {
         scores: scores.map(s => `${s.category}: ${s.score}%`),
@@ -58,7 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ scores, responses, items }) => {
         Keep it under 250 words. Format as clear HTML paragraphs with bolding for key terms. No markdown blocks.
       `;
 
-      const response = await genAI.models.generateContent({
+      const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
       });
